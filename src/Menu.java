@@ -44,7 +44,7 @@ public class Menu extends JPanel implements EventListener {
 
 }
 class MyGamePanel_withBox extends JPanel {
-    private JButton b1, b2, b3;     //declare 3 buttons
+    private JButton b1, b2, b3;    //declare 3 buttons
     private JTextField txt1, txt2, txt3;   //declare 3 Test Fields
 
     public MyGamePanel_withBox() {    // constructor
