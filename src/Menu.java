@@ -31,7 +31,6 @@ public class Menu extends JPanel implements EventListener {
         b3.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(b3);
         this.add(Box.createRigidArea(new Dimension(10, 120 )));// space at the end
-
     }
 
     public void paintComponent(Graphics g) {
