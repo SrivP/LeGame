@@ -2,8 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.EventListener;
-
 
 public class Menu extends JPanel implements ActionListener {
     private ImageIcon bg = new ImageIcon("dojo1.gif");
