@@ -48,19 +48,21 @@ public class Menu extends JPanel implements ActionListener {
 }
 
 class Levels extends JPanel implements ActionListener {
-    private JButton b1, b2, b3;     //declare 3 buttons
+    private JButton b0, b1, b2, b3;     //declare 3 buttons
     private ImageIcon bg = new ImageIcon("dungeon.gif");
 
 
     public Levels() {
+        ImageIcon back = new ImageIcon("back.png");
         ImageIcon lvl1 = new ImageIcon("lvl1.png");
         ImageIcon lvl2 = new ImageIcon("lvl2.png");
         ImageIcon lvl3 = new ImageIcon("lvl3.png");
 
-
-
+        b0 = new JButton(back);
+        b0.addActionListener(this);
+        b0.setContentAreaFilled(false);
+        b0.setBorderPainted(false);
         b1 = new JButton(lvl1);
-        b1.addActionListener(this);
         b1.setContentAreaFilled(false);
         b1.setBorderPainted(false);
         b2 = new JButton(lvl2);
@@ -70,27 +72,25 @@ class Levels extends JPanel implements ActionListener {
         b3.setContentAreaFilled(false);
         b3.setBorderPainted(false);
 
+        this.setLayout(new GridLayout(0, 4));
 
-
-        this.setLayout(new GridLayout(0, 3));
-
+        b0.setAlignmentY(Component.CENTER_ALIGNMENT);
+        this.add(b0);
         b1.setAlignmentY(Component.CENTER_ALIGNMENT);
         this.add(b1);
         b2.setAlignmentY(Component.CENTER_ALIGNMENT);
         this.add(b2);
         b3.setAlignmentY(Component.CENTER_ALIGNMENT);
         this.add(b3);
-
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         bg.paintIcon(this, g, 0, 0);
-
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == b1)
+        if (e.getSource() == b0)
             Main.cdly.next(Main.c);
     }
 }
