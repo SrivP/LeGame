@@ -8,7 +8,6 @@ public class Menu extends JPanel implements ActionListener {
     private JButton[] b = new JButton[3];  //declare 3 buttons
 
     public Menu() {
-
         b[0] = new JButton("Play");
         b[0].addActionListener(this);
         b[1] = new JButton("Instructions");
