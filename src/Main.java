@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class Main extends JFrame {
+public class Main extends JFrame implements ActionListener {
 
     static Container c;
     static CardLayout cdly;
@@ -30,11 +32,19 @@ public class Main extends JFrame {
         c.setLayout(cdly);
 
         menu = new Menu();
+        menu.b[2].addActionListener(this);
         levels = new Levels();
 
         c.add("Test", menu);
         c.add("Test2", levels);
 
+
+    }
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == menu.b[2]) {
+            setVisible(false);
+            dispose();
+        }
     }
 }
 
