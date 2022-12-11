@@ -10,6 +10,8 @@ public class Main extends JFrame implements ActionListener {
     Menu menu;
     Levels levels;
 
+    Level1 boss1;
+
 
     public static void main (String [] args) {
 
@@ -27,16 +29,18 @@ public class Main extends JFrame implements ActionListener {
         a.setSize(1280, 720);
     }
     public Main(){    //constructor
-        c=getContentPane();
+        c = getContentPane();
         cdly=new CardLayout();
         c.setLayout(cdly);
 
         menu = new Menu();
         menu.b[2].addActionListener(this);
         levels = new Levels();
+        boss1 = new Level1();
 
         c.add("Test", menu);
         c.add("Test2", levels);
+        c.add("Test3", boss1);
 
 
     }
