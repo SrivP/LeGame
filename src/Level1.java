@@ -93,10 +93,14 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
 
 class Player {
     private int x, y;
-    private boolean left;
     private double velx;
     private double vely;
+    boolean right;
+    boolean left;
+    boolean stay;
+
     private BufferedImage playerImg = null;
+
 
     public Player(int x,int y){
         this.x = x;
@@ -131,21 +135,33 @@ class Player {
     public void up() {
         velx = 0;
         vely = -100.5;
+        right = false;
+        left = false;
+        stay = true;
     }
 
     public void down() {
         velx = 0;
         vely = 100.5;
+        right = false;
+        left = false;
+        stay = true;
 
     }
 
     public void right() {
         velx = 100.5;
         vely = 0;
+        right = true;
+        left = false;
+        stay = false;
     }
     public void left() {
         velx = -100.5;
         vely = 0;
+        right = false;
+        left = true;
+        stay = false;
 
 
     }
@@ -153,9 +169,9 @@ class Player {
 
 
     public void myDraw(Graphics g){
-        if(Level1.stay)
+        if(stay)
             playerImg = MyImages.getBasicImg();
-        else if(Level1.right)
+        else if(right)
             playerImg=	MyImages.getNextRight();
 
         g.drawImage(playerImg,x,y,null);
