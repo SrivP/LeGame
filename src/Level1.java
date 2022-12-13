@@ -22,6 +22,7 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
         myT= new Timer(120,this);
         myT.start();
         setFocusable(true);
+
     }
 
 
@@ -31,7 +32,6 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
         super.paintComponent(g);
         bg.paintIcon(this, g, 0, 0);
         player.myDraw(g);
-
 
     }
 
@@ -92,15 +92,15 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
 }
 
 class Player {
-    private int x,y;
+    private int x, y;
     private boolean left;
     private double velx;
     private double vely;
     private BufferedImage playerImg = null;
 
     public Player(int x,int y){
-        this.x=x;
-        this.y=y;
+        this.x = x;
+        this.y = y;
         double velx = 0;
         double vely = 0;
 
@@ -126,6 +126,8 @@ class Player {
         x+=velx;
         y += vely;
     }
+
+
     public void up() {
         velx = 0;
         vely = -100.5;
@@ -169,9 +171,10 @@ class MyImages{
     private static int cnt=0;
 
     public static void loadImages(){
-        try{
-            spriteImg = ImageIO.read(new File("C:\\Users\\Sri\\IdeaProjects\\LeGame\\edgelord.png"));
-        }catch(Exception e){
+        try {
+            spriteImg = ImageIO.read(new File("edgelord.png"));
+        }
+        catch(Exception e) {
             System.out.print("Error" + e);
         }
         basicImg=spriteImg.getSubimage(5,197,61,100);
