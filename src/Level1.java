@@ -74,7 +74,21 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
     }
 
     public void keyReleased(KeyEvent e) {
-       player.velreset();
+        int code = e.getKeyCode();
+
+        if (code == KeyEvent.VK_LEFT) {
+            System.out.println("left");
+            right = true;
+        } else if (code == KeyEvent.VK_RIGHT) {
+            player.right();
+            System.out.println("right");
+            right = false;
+        }
+        else {
+            System.out.println("Yifan");
+        }
+
+        player.velreset();
     }
 
     public void mousePressed( MouseEvent e ){   }
