@@ -74,20 +74,6 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
     }
 
     public void keyReleased(KeyEvent e) {
-        int code = e.getKeyCode();
-
-        if (code == KeyEvent.VK_LEFT) {
-            System.out.println("left");
-            right = true;
-        } else if (code == KeyEvent.VK_RIGHT) {
-            player.right();
-            System.out.println("right");
-            right = false;
-        }
-        else {
-            System.out.println("Yifan");
-        }
-
         player.velreset();
     }
 
@@ -135,6 +121,9 @@ class Player {
     public void velreset() {
         velx = 0;
         vely = 0;
+        right = false;
+        left = false;
+        stay = true;
     }
 
     public int getX(){
@@ -187,6 +176,9 @@ class Player {
             playerImg = MyImages.getBasicImg();
         else if(right)
             playerImg=	MyImages.getNextRight();
+        else if (left) {
+            playerImg = MyImages.getNextLeft();
+        }
 
         g.drawImage(playerImg,x,y,null);
     }
@@ -198,28 +190,39 @@ class Player {
 class MyImages{
     private static BufferedImage spriteImg, basicImg;
     private static BufferedImage[] right;
+    private static BufferedImage[] left;
+
     private static int cnt=0;
 
     public static void loadImages(){
         try {
-            spriteImg = ImageIO.read(new File("edgelord.png"));
+            spriteImg = ImageIO.read(new File("Mc2.png"));
         }
         catch(Exception e) {
             System.out.print("Error" + e);
         }
-        basicImg=spriteImg.getSubimage(5,197,61,100);
+        basicImg=spriteImg.getSubimage(79,759,67,81);
 
         right= new BufferedImage[3];
-        BufferedImage[] left = new BufferedImage[3];
+        left = new BufferedImage[3];
 
-        right[1]= spriteImg.getSubimage(72,198,77,100);
-        right[2]= spriteImg.getSubimage(150,198,68,102);
-        right[0]= spriteImg.getSubimage(230,198,69,102);
+        right[0]= spriteImg.getSubimage(83,80,63,81);
+        right[1]= spriteImg.getSubimage(323,82,63,81);
+        right[2]= spriteImg.getSubimage(567,82,63,81);
+        left[0] = spriteImg.getSubimage(2250,433,64,80);
+        left[1] = spriteImg.getSubimage(2007,434,64,80);
+        left[2] = spriteImg.getSubimage(1763,435,64,80);
+
     }
 
     public static BufferedImage getNextRight(){
-        cnt=(cnt+1)%right.length;
+        cnt=(cnt+1) % right.length;
         return right[cnt];
+    }
+
+    public static BufferedImage getNextLeft(){
+        cnt=(cnt+1) % left.length;
+        return left[cnt];
     }
     public static BufferedImage getBasicImg(){
         return basicImg;
