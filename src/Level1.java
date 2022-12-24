@@ -16,7 +16,7 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
 
     public Level1() {
         MyImages.loadImages();
-        player= new Player (10,20);  // new player at the position 10,20
+        player= new Player (1270,520);  // new player at the position 10,20
 
         addKeyListener(this);
         myT= new Timer(120,this);
@@ -36,7 +36,7 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
     }
 
     public void actionPerformed(ActionEvent e) {
-        player.move();// timer events
+        player.velreset();// timer events
         repaint();
     }
 
@@ -51,20 +51,12 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
             player.up();
             System.out.println("up");
         }
-
-        else if (code == KeyEvent.VK_DOWN) {
-            player.down();
-            System.out.println("down");
-        }
-
         else if (code == KeyEvent.VK_LEFT) {
             player.left();
             System.out.println("left");
-            right = false;
         } else if (code == KeyEvent.VK_RIGHT) {
             player.right();
             System.out.println("right");
-            right = true;
         }
         else {
             System.out.println("Yifan");
@@ -93,11 +85,15 @@ public class Level1 extends JPanel implements ActionListener, KeyListener{
 
 class Player {
     private int x, y;
-    private double velx;
-    private double vely;
+    private static final int GRAVITY = 15;  // Gravity in pixels per frame
+    private static final int JUMP_VELOCITY = -30;  // Jump velocity in pixels per frame
+    private static final int MOVE_VELOCITY = 100;  // Move velocity in pixels per frame
+    private double vx;
+    private double vy;
     boolean right;
     boolean left;
     boolean stay;
+    boolean jump;
 
     private BufferedImage playerImg = null;
 
@@ -105,64 +101,58 @@ class Player {
     public Player(int x,int y){
         this.x = x;
         this.y = y;
-        double velx = 0;
-        double vely = 0;
+        double vx = 0;
+        double vy = 0;
 
     }
 
-    public double getVelx() {
-        return velx;
-    }
-
-    public double getVely() {
-        return vely;
-    }
 
     public void velreset() {
-        velx = 0;
-        vely = 0;
+        x += vx;
+        y += vy;
+        vx = 0;
+        vy = 0;
         right = false;
         left = false;
         stay = true;
+        jump = false;
+        // Update sprite position
+        vy += GRAVITY;
+
+        // Check for collision with the ground
+        if (y + 80 > 620) {
+            y = 620 - 80;
+            vy = 0;
+        }
+
+        // Prevent sprite from going out of the frame
+        if (x < 0) {
+            x = 0;
+        } else if (x + 64 > 1280) {
+            x = 1280 - 64;
+        }
+        if (y < 0) {
+            y = 0;
+        }
     }
 
-    public int getX(){
-        return x;
-    }
-    public void move(){
-        x+=velx;
-        y += vely;
-    }
+
 
 
     public void up() {
-        velx = 0;
-        vely = -100.5;
-        right = false;
-        left = false;
-        stay = true;
+        vy = JUMP_VELOCITY;
+        stay = false;
+        jump = true;
     }
 
-    public void down() {
-        velx = 0;
-        vely = 100.5;
-        right = false;
-        left = false;
-        stay = true;
-
-    }
 
     public void right() {
-        velx = 100.5;
-        vely = 0;
+       vx = MOVE_VELOCITY;
         right = true;
-        left = false;
         stay = false;
     }
     public void left() {
-        velx = -100.5;
-        vely = 0;
-        right = false;
+       vx = -MOVE_VELOCITY;
         left = true;
         stay = false;
 
@@ -178,6 +168,8 @@ class Player {
             playerImg=	MyImages.getNextRight();
         else if (left) {
             playerImg = MyImages.getNextLeft();
+        } else if (jump) {
+            playerImg = MyImages.getNextJump();
         }
 
         g.drawImage(playerImg,x,y,null);
@@ -191,6 +183,7 @@ class MyImages{
     private static BufferedImage spriteImg, basicImg;
     private static BufferedImage[] right;
     private static BufferedImage[] left;
+    private static BufferedImage[] jump;
 
     private static int cnt=0;
 
@@ -201,10 +194,11 @@ class MyImages{
         catch(Exception e) {
             System.out.print("Error" + e);
         }
-        basicImg=spriteImg.getSubimage(79,759,67,81);
+        basicImg=spriteImg.getSubimage(569,431,45,83);
 
         right= new BufferedImage[3];
         left = new BufferedImage[3];
+        jump = new BufferedImage[3];
 
         right[0]= spriteImg.getSubimage(83,80,63,81);
         right[1]= spriteImg.getSubimage(323,82,63,81);
@@ -212,12 +206,18 @@ class MyImages{
         left[0] = spriteImg.getSubimage(2250,433,64,80);
         left[1] = spriteImg.getSubimage(2007,434,64,80);
         left[2] = spriteImg.getSubimage(1763,435,64,80);
-
+        jump[0] = spriteImg.getSubimage(86,589,55,84);
+        jump[1] = spriteImg.getSubimage(327,591,55,84);
+        jump[2] = spriteImg.getSubimage(572,594,55,84);
     }
 
     public static BufferedImage getNextRight(){
         cnt=(cnt+1) % right.length;
         return right[cnt];
+    }
+    public static BufferedImage getNextJump(){
+        cnt=(cnt+1) % jump.length;
+        return jump[cnt];
     }
 
     public static BufferedImage getNextLeft(){

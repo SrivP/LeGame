@@ -12,8 +12,8 @@ public class Main extends JFrame implements ActionListener {
 
     Level1 boss1;
 
-
     public static void main (String [] args) {
+
 
         //Container c = f.getContentPane();
         //c.setLayout(new BorderLayout());  // set Layout to Border
