@@ -302,7 +302,6 @@ class Enemy extends Sprite {
 }
 
 
-
 // The Projectile class represents a projectile fired by the player sprite.
 // It has a position, size, and velocity, and can be either active or inactive.
 class Projectile {
