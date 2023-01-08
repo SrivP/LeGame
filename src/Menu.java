@@ -77,6 +77,7 @@ class Levels extends JPanel implements ActionListener {
         b[1] = new JButton(lvl1);
         b[1].addActionListener(this);
         b[2] = new JButton(lvl2);
+        b[2].addActionListener(this);
         b[3] = new JButton(lvl3);
 
         for (int i = 0; i < b.length; i++) {
@@ -96,6 +97,8 @@ class Levels extends JPanel implements ActionListener {
         if (e.getSource() == b[0])
             Main.cdly.next(Main.c);
         if (e.getSource() == b[1])
+            Main.cdly.next(Main.c);
+        if (e.getSource() == b[2])
             Main.cdly.next(Main.c);
     }
 }

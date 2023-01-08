@@ -11,6 +11,7 @@ public class Main extends JFrame implements ActionListener {
     Levels levels;
 
     Level1 boss1;
+    Level2 boss2;
 
     public static void main (String [] args) {
 
@@ -37,10 +38,12 @@ public class Main extends JFrame implements ActionListener {
         menu.b[2].addActionListener(this);
         levels = new Levels();
         boss1 = new Level1();
+        boss2 = new Level2();
 
         c.add("Test", menu);
         c.add("Test2", levels);
         c.add("Test3", boss1);
+        c.add("Test4", boss2);
 
 
     }
