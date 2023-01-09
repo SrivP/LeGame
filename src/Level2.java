@@ -42,7 +42,10 @@ public class Level2 extends JPanel implements ActionListener, KeyListener {
 
     }
 
-
+    public static void showWinnerDialog(Player winner) {
+        String message = winner instanceof Boss2 ? "Enemy wins!" : "Sprite wins!";
+        JOptionPane.showMessageDialog(null, message, "Game Over", JOptionPane.PLAIN_MESSAGE);
+    }
 
 
 
@@ -50,6 +53,17 @@ public class Level2 extends JPanel implements ActionListener, KeyListener {
         player.velreset();
         bs2.follow(player);
         bs2.move();
+
+        // check if either the sprite or enemy has zero health
+        if (player.getHealth() <= 0) {
+            showWinnerDialog(bs2);
+            System.exit(0);
+        } else if (bs2.getHealth() <= 0) {
+            showWinnerDialog(player);
+            System.exit(0);
+        }
+
+
 
         for (Projectile projectile : bs2.getProjectiles()) {
             projectile.follow(player);
@@ -61,7 +75,7 @@ public class Level2 extends JPanel implements ActionListener, KeyListener {
         for (Projectile projectile : bs2.getProjectiles()) {
             if (projectile.collidesWith(player)) {
                 projectile.setActive(false);
-                player.inflictDamage(25);
+                player.inflictDamage(0);
                 player.getHealthBar().setValue(player.getHealth());
             }
         }
@@ -101,9 +115,25 @@ public class Level2 extends JPanel implements ActionListener, KeyListener {
     }
 
     public void keyReleased(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        switch (keyCode) {
+
+            case KeyEvent.VK_LEFT:
+                // Stop moving left
+                if (player.getVx() < 0) {
+                    player.setVx(0);
+                }
+                break;
+            case KeyEvent.VK_RIGHT:
+                // Stop moving right
+                if (player.getVx() > 0) {
+                    player.setVx(0);
+                }
+                break;
+        }
         player.velreset();
-        bs2.fireProjectile();
         repaint();
+
 
     }
 

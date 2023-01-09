@@ -10,9 +10,9 @@ public class Player {
     protected int x;
     int cont = 0;
     protected int y;
-    private static final int GRAVITY = 15;  // Gravity in pixels per frame
-    private static final int JUMP_VELOCITY = -100;  // Jump velocity in pixels per frame
-    private static final int MOVE_VELOCITY = 100;  // Move velocity in pixels per frame
+    private static final int GRAVITY = 1;  // Gravity in pixels per frame
+    private static final int JUMP_VELOCITY = -15;  // Jump velocity in pixels per frame
+    private static final int MOVE_VELOCITY = 10;  // Move velocity in pixels per frame
     private double vx;
     private JProgressBar healthBar;
 
@@ -59,8 +59,7 @@ public class Player {
         cont++;
         x += vx;
         y += vy;
-        vx = 0;
-        vy = 0;
+
 
         Timer timer = new Timer(50, null);
         timer.start();
@@ -144,6 +143,14 @@ public class Player {
             return true;
         }
         return false;
+    }
+
+    public double getVx() {
+        return vx;
+    }
+
+    public void setVx(double vx) {
+        this.vx = vx;
     }
 
     public int getX() {
