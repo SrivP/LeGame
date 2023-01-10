@@ -1,143 +1,341 @@
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+import java.awt.Graphics;
 import java.util.ArrayList;
-import javax.swing.*;
+import java.util.List;
+
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Rectangle;
 
 
-public class SpriteGame {
+import javax.swing.JProgressBar;
+public class SpriteGame implements KeyListener {
+    // frame and panel for the game
+    private JFrame frame;
+    private GamePanel panel;
+
     public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        Sprite player = new Sprite();
-        Enemy enemy = new Enemy();
-        Timer timer = new Timer(50, null);
+        new SpriteGame();
+    }
 
-        // Add key listener to move the player sprite
-        frame.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {}
+    public SpriteGame() {
+        // create the frame and panel
+        frame = new JFrame();
+        panel = new GamePanel();
 
-            @Override
-            public void keyReleased(KeyEvent e) {}
+        // add key listener to the panel
+        panel.addKeyListener(this);
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    player.moveLeft();
-                } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    player.moveRight();
-                } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    player.moveUp();
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    player.moveDown();
-                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    // Fire a projectile when the enter key is pressed
-                    player.fireProjectile();
-                }
-            }
-        });
-
-        // Add a timer to update the game state every 50 milliseconds
-        timer.addActionListener(new ActionListener()  {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Make the enemy follow the player
-                enemy.follow(player);
-                // Update the positions of the sprites based on their velocities
-                if (!player.isFrozen()) {
-                    player.updatePosition();
-                }
-                enemy.updatePosition();
-
-                // Update the positions of the projectiles based on their velocities
-                for (Projectile projectile : player.getProjectiles()) {
-                    if (projectile.isActive()) {
-                        projectile.setX(projectile.getX() + projectile.getVX());
-                        projectile.setY(projectile.getY() + projectile.getVY());
-                    }
-                }
-
-                // Check for collisions
-                if (player.collidesWith(enemy)) {
-                    player.freeze(500);
-                    player.inflictDamage(1);
-                    player.getHealthBar().setValue(player.getHealth());
-                }
-                for (Projectile projectile : player.getProjectiles()) {
-                    if (projectile.collidesWith(enemy)) {
-                        projectile.setActive(false);
-                        enemy.inflictDamage(10);
-                        enemy.getHealthBar().setValue(enemy.getHealth());
-                    }
-                }
-
-                // Check if the player or enemy has been defeated
-                if (player.getHealth() <= 0) {
-                    timer.stop();
-                    JOptionPane.showMessageDialog(frame, "Enemy wins!");
-                    frame.dispose();
-                } else if (enemy.getHealth() <= 0) {
-                    timer.stop();
-                    JOptionPane.showMessageDialog(frame, "Player wins!");
-                    frame.dispose();
-                }
-
-                // Repaint the frame to update the game state
-                frame.repaint();
-            }
-        });
-        timer.start();
-
-        frame.setSize(1280, 720);
-        frame.setLayout(null);
+        // add the panel to the frame and set the frame's properties
+        frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(player.getHealthBar());
-        frame.add(enemy.getHealthBar());
+        frame.setTitle("Java Game");
+        frame.setResizable(false);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        frame.setSize(1280, 720);
 
-        // Override the paintComponent method of the JFrame to draw the sprites and projectiles
-        frame.add(new JComponent() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                player.draw(g);
-                enemy.draw(g);
-            }
-        });
+        // start the game loop in the panel
+        panel.start();
+    }
+
+    // handle key events
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.VK_LEFT:
+                panel.getSprite().setVelocity(-5, 0);
+                break;
+            case KeyEvent.VK_RIGHT:
+                panel.getSprite().setVelocity(5, 0);
+                break;
+            case KeyEvent.VK_UP:
+                panel.getSprite().jump();
+                break;
+            case KeyEvent.VK_DOWN:
+                panel.getSprite().setVelocity(0, 5);
+                break;
+            case KeyEvent.VK_ENTER:
+                panel.addProjectile(panel.getSprite().getX(), panel.getSprite().getY());
+                break;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        switch (keyCode) {
+
+            case KeyEvent.VK_LEFT:
+                // Stop moving left
+                if (panel.getSprite().getDx() < 0) {
+                    panel.getSprite().setDx(0);
+                }
+                break;
+            case KeyEvent.VK_RIGHT:
+                // Stop moving right
+                if (panel.getSprite().getDx() > 0) {
+                    panel.getSprite().setDx(0);
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    // show a message dialog to display the winner
+    public static void showWinnerDialog(Sprite winner) {
+        String message = winner instanceof Enemy ? "Enemy wins!" : "Sprite wins!";
+        JOptionPane.showMessageDialog(null, message, "Game Over", JOptionPane.PLAIN_MESSAGE);
     }
 }
 
-class Sprite {
-    protected int x;
-    protected int y;
-    protected int vx;
-    protected int vy;
-    protected int width;
-    protected int height;
-    protected Image image;
-    protected ArrayList<Projectile> projectiles;
-    private int health;
-    private JProgressBar healthBar;
-    private long freezeStartTime;
-    private long freezeDuration;
 
-    public Sprite() {
-        x = 0;
-        y = 0;
-        vx = 0;
-        vy = 0;
-        width = 0;
-        height = 0;
-        image = null;
+
+class GamePanel extends JPanel {
+    // the sprite and enemy
+    private Sprite sprite;
+    private Enemy enemy;
+
+    // list of projectiles
+    private List<Projectile> projectiles;
+
+    public GamePanel() {
+        // create the sprite and enemy
+        sprite = new Sprite(50, 50, 50, 50, 100);
+        enemy = new Enemy(250, 250, 50, 50, 100, sprite);
+
+        // create the list of projectiles
         projectiles = new ArrayList<>();
-        health = 100;
-        healthBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
-        freezeStartTime = 0;
-        freezeDuration = 0;
+
+        // set focusable to true to allow key events
+        setFocusable(true);
     }
 
+    // update the game state
+    public void update() {
+        sprite.update();
+        enemy.update();
+
+        // update projectiles
+        for (int i = 0; i < projectiles.size(); i++) {
+            projectiles.get(i).update();
+        }
+
+        // check for collision between sprite and enemy
+        checkSpriteEnemyCollision(sprite, enemy);
+
+
+        // check for collision between projectiles and enemy
+        for (int i = 0; i < projectiles.size(); i++) {
+            checkProjectileCollisions(enemy);
+        }
+
+        // check if either the sprite or enemy has zero health
+        if (sprite.getHealth() <= 0) {
+            SpriteGame.showWinnerDialog(enemy);
+            System.exit(0);
+        } else if (enemy.getHealth() <= 0) {
+            SpriteGame.showWinnerDialog(sprite);
+            System.exit(0);
+        }
+    }
+    // check if the sprite intersects with any projectiles
+    public void checkProjectileCollisions(Sprite sprite) {
+        for (int i = 0; i < projectiles.size(); i++) {
+            Projectile p = projectiles.get(i);
+            if (p.intersects(sprite.getBounds())) {
+                sprite.inflictDamage(1);
+                enemy.setHealth(enemy.getHealth() - 1);
+                projectiles.remove(i);
+            }
+        }
+    }
+    // check if the sprite and enemy are colliding
+    public void checkSpriteEnemyCollision(Sprite sprite, Enemy enemy) {
+        if (sprite.intersects(enemy.getBounds())) {
+            sprite.freeze(200);
+            //sprite.inflictDamage(1);
+            enemy.inflictDamage(1);
+            sprite.setHealth(sprite.getHealth() - 1);
+        }
+    }
+
+
+
+    // paint the game panel
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // draw the sprite
+        sprite.draw(g);
+
+        // draw the enemy
+        enemy.draw(g);
+
+        // draw the projectiles
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g);
+        }
+
+    }
+
+
+    // add a projectile to the list
+    public void addProjectile(int x, int y) {
+        projectiles.add(new Projectile(x, y));
+    }
+
+    // start the game loop
+    public void start() {
+        Thread thread = new Thread(() -> {
+            while (true) {
+                update();
+                repaint();
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
+    // getters for the sprite and enemy
+    public Sprite getSprite() {
+        return sprite;
+    }
+
+    public Enemy getEnemy() {
+        return enemy;
+    }
+}
+
+
+
+
+class Sprite {
+    // minimum and maximum x and y positions of the sprite
+    private static final int MIN_X = 0;
+    private static final int MAX_X = 800;
+    private static final int MIN_Y = 0;
+    private static final int MAX_Y = 600;
+
+    // x and y position of the sprite
+    protected int x;
+    protected int y;
+
+    // width and height of the sprite
+    protected int width;
+    protected int height;
+
+    // velocity of the sprite in the x and y direction
+    protected int dx;
+    protected int dy;
+    // gravitational acceleration
+    protected static final int GRAVITY = 1;
+
+
+    // health of the sprite
+    protected int health;
+
+    // health bar for the sprite
+    protected JProgressBar healthBar;
+
+    // time remaining until the sprite is unfrozen
+    private long freezeTime;
+
+    public Sprite(int x, int y, int width, int height, int health) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.health = health;
+
+        // create the health bar and set its properties
+        healthBar = new JProgressBar();
+        healthBar.setMaximum(health);
+        healthBar.setMinimum(0);
+        healthBar.setValue(health);
+        healthBar.setStringPainted(true);
+
+        // set the sprite's initial velocity to zero
+        dx = 0;
+        dy = 0;
+
+        // set the freeze time to zero
+        freezeTime = 0;
+    }
+
+    // update the sprite's state
+    public void update() {
+        // check if the sprite is frozen
+        if (System.currentTimeMillis() < freezeTime) {
+            return;
+        }
+
+        dy += GRAVITY;
+
+        // update the sprite's position
+        x += dx;
+        y += dy;
+
+        // prevent the sprite from going out of the frame
+        if (x < MIN_X) {
+            x = MIN_X;
+        } else if (x > MAX_X - width) {
+            x = MAX_X - width;
+        }
+        if (y < MIN_Y) {
+            y = MIN_Y;
+        } else if (y > MAX_Y - height) {
+            y = MAX_Y - height;
+        }
+
+        // update the health bar
+        healthBar.setValue(health);
+    }
+
+    // draw the sprite
+    public void draw(Graphics g) {
+        g.setColor(Color.BLUE);
+        g.fillRect(x, y, width, height);
+        healthBar.setBounds(x, y - 20, width, 20);
+        healthBar.paint(g);
+    }
+
+    // set the sprite's velocity
+    public void setVelocity(int dx, int dy) {
+        this.dx = dx;
+        this.dy = dy;
+    }
+
+    // freeze the sprite for a certain amount of time
+    public void freeze(int time) {
+        freezeTime = System.currentTimeMillis() + time;
+    }
+
+    // inflict damage on the sprite
+    public void inflictDamage(int damage) {
+        health -= damage;
+    }
+
+    public void jump() {
+        dy = -20;
+    }
+
+    // getters for the sprite's position, size, and health
     public int getX() {
         return x;
     }
@@ -146,12 +344,12 @@ class Sprite {
         return y;
     }
 
-    public int getVX() {
-        return vx;
+    public int getDx() {
+        return dx;
     }
 
-    public int getVY() {
-        return vy;
+    public void setDx(int dx) {
+        this.dx = dx;
     }
 
     public int getWidth() {
@@ -160,246 +358,120 @@ class Sprite {
 
     public int getHeight() {
         return height;
-    }
-
-    public Image getImage() {
-        return image;
-    }
-
-    public ArrayList<Projectile> getProjectiles() {
-        return projectiles;
     }
 
     public int getHealth() {
         return health;
     }
 
+    // set the sprite's health
+    public void setHealth(int health) {
+        this.health = health;
+        healthBar.setValue(health);
+    }
+
     public JProgressBar getHealthBar() {
         return healthBar;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    // check if the sprite intersects with another rectangle
+    public boolean intersects(Rectangle r) {
+        return getBounds().intersects(r);
     }
 
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public void setVX(int vx) {
-        this.vx = vx;
-    }
-
-    public void setVY(int vy) {
-        this.vy = vy;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
-    }
-
-    public void setHealth(int health) {
-        this.health = health;
-    }
-
-    public void moveLeft() {
-        vx = -5;
-    }
-
-    public void moveRight() {
-        vx = 5;
-    }
-
-    public void moveUp() {
-        vy = -5;
-    }
-
-    public void moveDown() {
-        vy = 5;
-    }
-
-    public void fireProjectile() {
-        Projectile projectile = new Projectile(x, y);
-        projectiles.add(projectile);
-    }
-
-    public void updatePosition() {
-        x += vx;
-        y += vy;
-        vx = 0;
-        vy = 0;
-    }
-
-    public boolean collidesWith(Sprite other) {
-        if (x + width > other.getX() && x < other.getX() + other.getWidth() &&
-                y + height > other.getY() && y < other.getY() + other.getHeight()) {
-            return true;
-        }
-        return false;
-    }
-
-    public void inflictDamage(int damage) {
-        health -= damage;
-    }
-
-    public void freeze(long duration) {
-        freezeStartTime = System.currentTimeMillis();
-        freezeDuration = duration;
-    }
-
-    public boolean isFrozen() {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - freezeStartTime < freezeDuration) {
-            return true;
-        }
-        return false;
-    }
-
-    public void draw(Graphics g) {
-        g.drawImage(image, x, y, width, height, null);
-        for (Projectile projectile : projectiles) {
-            projectile.paintComponent(g);
-        }
+    // get the sprite's bounds
+    // get the sprite's bounds
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
     }
 }
 
 class Enemy extends Sprite {
-    public Enemy() {
-        super();
+    private Sprite target;
+
+    public Enemy(int x, int y, int width, int height, int health, Sprite target) {
+        super(x, y, width, height, health);
+        this.target = target;
+
+        healthBar = new JProgressBar();
+        healthBar.setMaximum(health);
+        healthBar.setMinimum(0);
+        healthBar.setValue(health);
+        healthBar.setStringPainted(true);
     }
 
-    // Makes the enemy follow the player sprite
-    public void follow(Sprite player) {
-        // Calculate the distance between the enemy and player in the x and y directions
-        int dx = player.getX() - getX();
-        int dy = player.getY() - getY();
+    // update the enemy's state
+    @Override
+    public void update() {
 
-        // Set the velocity in the x and y directions to move the enemy towards the player
-        setVX(dx / 10);
-        setVY(dy / 10);
-    }
-    // Update the position of the enemy based on its velocity
-    public void updatePosition() {
-        setX(getX() + getVX());
-        setY(getY() + getVY());
-    }
-
-    public void draw(Graphics g) {
-        g.drawImage(image, x, y, width, height, null);
-        for (Projectile projectile : projectiles) {
-            projectile.paintComponent(g);
+        // follow the sprite
+        if (x < target.getX()) {
+            dx = 1;
+        } else if (x > target.getX()) {
+            dx = -1;
         }
+        if (y < target.getY()) {
+            dy = 1;
+        } else if (y > target.getY()) {
+            dy = -1;
+        }
+
+        x += dx;
+        y += dy;
+
+
+
+
+        super.update();
+        healthBar.setValue(health);
+
     }
 
+    // draw the enemy
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(Color.RED);
+        g.fillRect(x, y, width, height);
+        healthBar.setBounds(100, y - 80, width, 20);
+        healthBar.paint(g);
+    }
 }
 
 
-// The Projectile class represents a projectile fired by the player sprite.
-// It has a position, size, and velocity, and can be either active or inactive.
-class Projectile {
-    private int x, y, width, height, vx, vy;
-    private boolean active;
+
+    class Projectile {
+    // x and y position of the projectile
+    private int x;
+    private int y;
+
+    // width and height of the projectile
+    private static final int WIDTH = 10;
+    private static final int HEIGHT = 10;
 
     public Projectile(int x, int y) {
         this.x = x;
         this.y = y;
-        width = 10;
-        height = 10;
-        vx = 10;
-        vy = 0;
-        active = true;
     }
 
-    // Returns the x position of the projectile
-    public int getX() {
-        return x;
+    // update the projectile's position
+    public void update() {
+        x += 5;
     }
 
-    // Returns the y position of the projectile
-    public int getY() {
-        return y;
+    // draw the projectile
+    public void draw(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.fillRect(x, y, WIDTH, HEIGHT);
     }
 
-    // Returns the width of the projectile
-    public int getWidth() {
-        return width;
+    // check if the projectile intersects with another rectangle
+    public boolean intersects(Rectangle r) {
+        return getBounds().intersects(r);
     }
 
-    // Returns the height of the projectile
-    public int getHeight() {
-        return height;
-    }
-
-    // Returns the velocity in the x direction of the projectile
-    public int getVX() {
-        return vx;
-    }
-
-    // Returns the velocity in the y direction of the projectile
-    public int getVY() {
-        return vy;
-    }
-
-    // Returns true if the projectile is active, false otherwise
-    public boolean isActive() {
-        return active;
-    }
-
-    // Sets the x position of the projectile
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    // Sets the y position of the projectile
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    // Sets the width of the projectile
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    // Sets the height of the projectile
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    // Sets the velocity in the x direction of the projectile
-    public void setVX(int vx) {
-        this.vx = vx;
-    }
-
-    // Sets the velocity in the y direction of the projectile
-    public void setVY(int vy) {
-        this.vy = vy;
-    }
-
-    // Sets the active status of the projectile
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    // Returns true if this projectile collides with a sprite, false otherwise
-    public boolean collidesWith(Sprite sprite) {
-        Rectangle thisRect = new Rectangle(x, y, width, height);
-        Rectangle spriteRect = new Rectangle(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
-        return thisRect.intersects(spriteRect);
-    }
-
-    public void paintComponent(Graphics g) {
-        if (active) {
-            // Draw the projectile
-            g.setColor(Color.BLACK);
-            g.fillRect(x, y, width, height);
-        }
+    // get the projectile's bounds
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, WIDTH, HEIGHT);
     }
 }
+
